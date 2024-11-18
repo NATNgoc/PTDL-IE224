@@ -5,6 +5,7 @@ isort
 jupyterlab
 loguru
 matplotlib
+seaborn
 notebook
 numpy
 pandas
