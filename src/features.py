@@ -39,8 +39,8 @@ def encode_categorical_features(df, categorical_columns):
 
 @app.command()
 def main(
-    input_path: Path = PROCESSED_DATA_DIR / "handled_missing_values.csv",
-    output_path: Path = PROCESSED_DATA_DIR / "test_handled_missing_values.csv",
+    input_path: Path = PROCESSED_DATA_DIR / "test_handled_missing_values.csv",
+    output_path: Path = PROCESSED_DATA_DIR / "test_normalized.csv",
 ):
     logger.info(f"Đang đọc dữ liệu từ {input_path}...")
     df = pd.read_csv(input_path)
