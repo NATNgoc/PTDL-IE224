@@ -6,7 +6,7 @@ from tqdm import tqdm
 import pandas as pd
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 import numpy as np
-
+import pickle
 from src.config import PROCESSED_DATA_DIR
 
 app = typer.Typer()
@@ -18,6 +18,8 @@ def normalize_numeric_features(df: pd.DataFrame, numeric_columns: list) -> pd.Da
     scaler = StandardScaler()
     df_copy = df.copy()
     df_copy[numeric_columns] = scaler.fit_transform(df[numeric_columns])
+    with open(f'{PROCESSED_DATA_DIR}/scaler.pkl', 'wb') as f:
+        pickle.dump(scaler, f)
     return df_copy
 
 def encode_categorical_features(df, categorical_columns):
@@ -35,6 +37,8 @@ def encode_categorical_features(df, categorical_columns):
     )
     df_copy = df_copy.drop(columns=categorical_columns)
     df_copy = pd.concat([df_copy, encoded_df], axis=1)
+    with open(f'{PROCESSED_DATA_DIR}/encoder.pkl', 'wb') as f:
+        pickle.dump(encoder, f)
     return df_copy
 
 @app.command()
@@ -45,11 +49,11 @@ def main(
     logger.info(f"Đang đọc dữ liệu từ {input_path}...")
     df = pd.read_csv(input_path)
     
-    if "price" in df.columns:
-        df = df.drop("price", axis=1)
+    
     numeric_columns = df.select_dtypes(include=['number']).columns.tolist()
     categorical_columns = df.select_dtypes(include=['category', 'object']).columns.tolist()
-
+    if "Age" in numeric_columns:
+        numeric_columns.remove("Age")
     if numeric_columns:
         logger.info("Đang chuẩn hóa các biến số...")
         df = normalize_numeric_features(df, numeric_columns)
@@ -61,6 +65,11 @@ def main(
     logger.info(f"Đang lưu features đã xử lý vào {output_path}...")
     df.to_csv(output_path, index=False)
     logger.success("Hoàn thành việc tạo features!")
+    
+    full_columns = df.columns.tolist()
+    with open(f'{PROCESSED_DATA_DIR}/columns.pkl', 'wb') as f:
+        pickle.dump(full_columns, f)
+
 
 if __name__ == "__main__":
     app()
